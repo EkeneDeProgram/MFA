@@ -1,0 +1,2 @@
+django==4.2.5
+django-otp==1.2.3
