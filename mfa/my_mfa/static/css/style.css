@@ -1,0 +1,40 @@
+/* styles.css */
+
+.center-container {
+    display: flex;
+    justify-content: center; /* Horizontally center */
+    align-items: center; /* Vertically center */
+    height: 100vh; /* Full viewport height */
+}
+
+.registration-container {
+    /* Increase the width and height to make the form larger */
+    max-width: 600px; /* Adjust as needed */
+    width: 100%; /* Adjust as needed */
+    height: 400px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    display: flex;
+    flex-direction: column; /* Stack child elements vertically */
+    align-items: center; /* Center child elements horizontally */
+}
+
+h1 {
+    width: 100%; /* Make the form-group take up the full width */
+    max-width: 400px; /* Adjust as needed for form-group width */
+    margin-bottom: 20px; 
+}
+
+.form-group {
+    width: 100%; /* Make the form-group take up the full width */
+    max-width: 400px; /* Adjust as needed for form-group width */
+    margin-bottom: 40px; /* Increase spacing between form-groups */
+}
+
+.register-button {
+    width: 100%; /* Make the form-group take up the full width */
+    max-width: 400px; /* Adjust as needed for form-group width */
+    margin-bottom: 20px; 
+}
