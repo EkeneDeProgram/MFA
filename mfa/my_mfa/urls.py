@@ -4,7 +4,8 @@ from . import views
 
 urlpatterns = [
     path("registration/", views.register_user, name="registration"),
-    path("authentication/", views.user_authentication, name="authentication"),
-    path("mfa-status/", views.mfa_status, name="mfa_status"),
+    path("mfa/", views.enable_mfa, name="mfa"),
+    path("mfa-method/", views.set_mfa_method, name="mfa-method"),
+    path("mfa_settings/", views.update_mfa_status, name="mfa_settings"),
     path("mfa-verification/", views.mfa_verification, name="mfa_verification"),
 ]

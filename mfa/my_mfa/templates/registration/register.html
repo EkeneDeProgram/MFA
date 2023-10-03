@@ -1,8 +1,9 @@
 {% load static %}
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Registration</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
@@ -21,16 +22,23 @@
                     {{ form.email }}
                 </div>
                 <div class="form-group">
-                    <label for="{{ form.password.id_for_label }}">Password:</label>
-                    {{ form.password1 }}
+                    <label for="{{ form.password1.id_for_label }}">Password:</label>
+                    <input type="password" name="{{ form.password1.name }}" id="{{ form.password1.id }}" class="password-field" />
                 </div>
                 <div class="form-group">
-                    <label for="{{ form.confirm_password.id_for_label }}">Confirm Password:</label>
-                    {{ form.password2 }}
+                    <label for="{{ form.password2.id_for_label }}">Confirm Password:</label>
+                    <input type="password" name="{{ form.password2.name }}" id="{{ form.password2.id }}" class="password-field" />
+                </div>
+                <!-- Add "Show Password" checkbox -->
+                <div class="form-group">
+                    <input type="checkbox" id="show-password-checkbox" class="show-password-checkbox" />
+                    <label for="show-password-checkbox">Show Password</label>
                 </div>
                 <button type="submit" class="register-button">Register</button>
             </form>
         </div>
     </div>
+    <!-- Include JavaScript to toggle password visibility -->
+    <script src="{% static 'js/password-toggle.js' %}"></script>
 </body>
 </html>

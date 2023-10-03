@@ -1,0 +1,22 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enable MFA</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <div class="center-container">
+        <div class="container">
+            <h2>Enable Multi-Factor Authentication (MFA)</h2>
+            <form method="post">
+                {% csrf_token %}
+                <p>Click the button below to enable MFA for your account:</p>
+                <button type="submit">Enable MFA</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
