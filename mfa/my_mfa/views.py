@@ -5,9 +5,15 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
 
+# Import third party modules
+from qrcode.image.pure import PymagingImage
+import pyotp
+import qrcode
+
 # Import my_mfa modules
 from .forms import RegistrationForm
-from .models import UserProfile  
+from .models import UserProfile 
+from .utils import *  
 
 # Create your views here.
 
@@ -71,8 +77,8 @@ def user_authentication(request):
             user_profile = UserProfile.objects.get(user=user)
             if user_profile.mfa_enabled: # Check if mfa is enable for user
                 if user_profile.mfa_method == "TOTP":
-                    if not user_profile.secret_key: # If the UserProfile secret_key field is empty
-                        return HttpResponse("Good TOTP")
+                    if not user_profile.totp_secret_key: # If the UserProfile secret_key field is empty
+                        return redirect("totp-qr-code")
                     else:
                         pass
                 elif user_profile.mfa_method == "SMS":
@@ -91,6 +97,52 @@ def user_authentication(request):
             # Authentication failed, show an error message
             messages.error(request, 'Invalid username or password.')
     return render(request, "authentication/login.html") 
+
+
+# Defind a view to generate totp_qr_code
+@login_required
+def generate_totp_qr_code(request):
+    # Generate secret key in base32 format
+    secret_key = generate_key()
+    encryption_key = generate_encryption_key() # Generate encryption key
+    encrypt_secret_key = encrypt_secret(secret_key, encryption_key) # Encrypt totp_secret_key
+
+    # Retrieve user UserProfile details
+    user_profile = UserProfile.objects.get(user=request.user)
+    username = user_profile.user.username # Get user name from django in-built User models
+
+    # Update UserProfile details
+    user_profile.encryption_key = encryption_key
+    user_profile.totp_secret_key = encrypt_secret_key
+    user_profile.save()
+    
+    # Create a TOTP object
+    totp = pyotp.TOTP(secret_key)
+    # Generate the current TOTP value
+    totp_value = totp.now()
+    # Create a TOTP provisioning URL
+    totp_url = totp.provisioning_uri(username, issuer_name="909ine MFA System")
+    # Generate a QR code for the TOTP URL
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(totp_url)
+    qr.make(fit=True)
+    qr_code_image = qr.make_image(fill_color="black", back_color="white", image_factory=PymagingImage)
+    
+    # Pass the TOTP URL, QR code image, secret key, and TOTP value to the template
+    context = {
+        "totp_url": totp_url,
+        "qr_code_image": qr_code_image,
+        "secret_key": secret_key,
+        "totp_value": totp_value,
+        "username": username,
+    }
+
+    return render(request, "authentication/generate_totp.html", context)
 
 
 # Define a view for updating user MFA status

@@ -127,6 +127,12 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'my_mfa/static'),
 ]
 
+# Configure media files
+# Define the base URL where media files (e.g., user-uploaded images, files) will be served from.
+MEDIA_URL = '/media/'
+# Define the absolute file system path to the directory where media files will be stored on the server.
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
