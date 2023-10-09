@@ -131,7 +131,9 @@ STATICFILES_DIRS = [
 # Define the base URL where media files (e.g., user-uploaded images, files) will be served from.
 MEDIA_URL = '/media/'
 # Define the absolute file system path to the directory where media files will be stored on the server.
+#MEDIA_ROOT = os.path.join(BASE_DIR, 'qr_codes')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+#MEDIA_ROOT = os.path.join(BASE_DIR, 'media/qr_codes/')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field

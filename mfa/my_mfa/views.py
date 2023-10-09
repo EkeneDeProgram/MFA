@@ -6,9 +6,12 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
 
 # Import third party modules
-from qrcode.image.pure import PymagingImage
+# from qrcode.image.pure import PymagingImage
+from PIL import Image as PilImage
 import pyotp
 import qrcode
+import io
+from django.core.files.base import ContentFile
 
 # Import my_mfa modules
 from .forms import RegistrationForm
@@ -128,21 +131,35 @@ def generate_totp_qr_code(request):
         error_correction=qrcode.constants.ERROR_CORRECT_L,
         box_size=10,
         border=4,
+        #image_factory=PilImage,
     )
     qr.add_data(totp_url)
     qr.make(fit=True)
-    qr_code_image = qr.make_image(fill_color="black", back_color="white", image_factory=PymagingImage)
+    qr_code_image = qr.make_image(fill_color="black", back_color="white")
+
+    # Convert the QR code image to a specific format (e.g., PNG) using Pillow
+    image_io = io.BytesIO()
+    qr_code_image.save(image_io, format="PNG")
+    image_io.seek(0)
+
+    # Save the QR code image to the model
+    user_profile.name = "QR Code"
+    #user_profile.image.save("qr_code.png", qr_code_image)
+    user_profile.image.save("qr_code.png", ContentFile(image_io.read()))
+
+    qr_code = user_profile.image.url
     
     # Pass the TOTP URL, QR code image, secret key, and TOTP value to the template
     context = {
         "totp_url": totp_url,
-        "qr_code_image": qr_code_image,
-        "secret_key": secret_key,
+        "user_profile.image.url": user_profile.image.url,
+        "qr_code": qr_code,
+        #"secret_key": secret_key,
         "totp_value": totp_value,
         "username": username,
     }
 
-    return render(request, "authentication/generate_totp.html", context)
+    return render(request, "authentication/generate_totp.html",context)
 
 
 # Define a view for updating user MFA status
