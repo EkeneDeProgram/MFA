@@ -107,7 +107,9 @@ def user_authentication(request):
 def generate_totp_qr_code(request):
     # Generate secret key in base32 format
     secret_key = generate_key()
+    print(secret_key)
     encryption_key = generate_encryption_key() # Generate encryption key
+    print(encryption_key)
     encrypt_secret_key = encrypt_secret(secret_key, encryption_key) # Encrypt totp_secret_key
 
     # Retrieve user UserProfile details
@@ -118,6 +120,8 @@ def generate_totp_qr_code(request):
     user_profile.encryption_key = encryption_key
     user_profile.totp_secret_key = encrypt_secret_key
     user_profile.save()
+    print(user_profile.encryption_key)
+    print(user_profile.totp_secret_key)
     
     # Create a TOTP object
     totp = pyotp.TOTP(secret_key)
@@ -152,14 +156,38 @@ def generate_totp_qr_code(request):
     # Pass the TOTP URL, QR code image, secret key, and TOTP value to the template
     context = {
         "totp_url": totp_url,
-        "user_profile.image.url": user_profile.image.url,
         "qr_code": qr_code,
-        #"secret_key": secret_key,
         "totp_value": totp_value,
         "username": username,
     }
 
     return render(request, "authentication/generate_totp.html",context)
+
+
+# Defind view to verify totp
+def verify_totp(request):
+    if request.method == "POST":
+        # Get the TOTP code entered by the user
+        user_input_totp = request.POST.get("totp_code")
+
+        # Get user's profile
+        user_profile = UserProfile.objects.get(user=request.user)
+
+        encryption_key = user_profile.encryption_key
+        secret_key = user_profile.totp_secret_key
+        decrypted_secret_key = decrypt_totp_secret_key(secret_key, encryption_key)
+        print(encryption_key)
+        print(secret_key)
+        print(decrypted_secret_key)
+
+        # Verify the TOTP code
+        #totp = pyotp.TOTP(user_profile.totp_secret_key)
+        totp = pyotp.TOTP(decrypted_secret_key)
+        if totp.verify(user_input_totp):
+            messages.success(request, "TOTP code is valid.")
+        else:
+            messages.error(request, "Invalid TOTP code.")
+    return render(request, "authentication/verify_totp.html")
 
 
 # Define a view for updating user MFA status

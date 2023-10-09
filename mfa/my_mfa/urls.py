@@ -8,5 +8,6 @@ urlpatterns = [
     path("mfa-method/", views.set_mfa_method, name="mfa-method"),
     path("login/", views.user_authentication, name="login"),
     path("totp-qr-code", views.generate_totp_qr_code, name="totp-qr-code"),
+    path("verify-totp", views.verify_totp, name="verify-totp"),
     path("mfa_settings/", views.update_mfa_status, name="mfa_settings"),
 ]

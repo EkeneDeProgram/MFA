@@ -12,5 +12,7 @@ env/
 
 # Ignore IDE-specific files and directories
 .vscode/
+# Exclude MFA QR codes
+.png
 
 

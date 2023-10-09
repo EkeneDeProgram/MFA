@@ -24,22 +24,35 @@ def generate_encryption_key():
 
 # Encrypt totp_secret_key
 def encrypt_secret(totp_key, encryption_key):
-    # Initialize the Fernet symmetric encryption object with the encryption key
-    cipher_suite = Fernet(encryption_key)
-    # Convert the TOTP secret key to bytes
-    totp_key_bytes = totp_key.encode('utf-8')
-    # Encrypt the TOTP secret key
-    encrypted_secret = cipher_suite.encrypt(totp_key_bytes)
-    return encrypted_secret
+    try:
+        # Initialize the Fernet symmetric encryption object with the encryption key
+        cipher_suite = Fernet(encryption_key)
+        encrypted_secret = cipher_suite.encrypt(totp_key.encode())
+        return encrypted_secret
+    except Exception as e:
+        # Handle encryption error
+        print("Encryption error:", e)
+        return None
 
 
 # Decypt totp_secret_key
 def decrypt_totp_secret_key(encrypted_totp_key, encryption_key):
-    cipher_suite = Fernet(encryption_key)
-    # Decrypt totp_secret_key
-    decrypted_totp_secret_key = cipher_suite.decrypt(encrypted_totp_key)
-    # Convert the decrypted data to a UTF-8 encoded string
-    decrypted_totp_key_str = decrypted_totp_secret_key.decode('utf-8')
-    return decrypted_totp_key_str
+    try:
+        cipher_suite = Fernet(encryption_key)
+        # Decrypt totp_secret_key
+        decrypted_totp_secret_key = cipher_suite.decrypt(encrypted_totp_key).decode()
+        return decrypted_totp_secret_key
+    except Exception as e:
+        # Handle decryption error
+        print("Decryption error:", e)
+        return None
 
 
+x = generate_key()
+y = generate_encryption_key()
+print(x)
+print(y)
+z = encrypt_secret(x, y)
+print(z)
+a = decrypt_totp_secret_key(z, y)
+print(a)
