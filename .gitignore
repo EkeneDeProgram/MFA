@@ -14,5 +14,6 @@ env/
 .vscode/
 # Exclude MFA QR codes
 .png
+qr_codes/
 
 
