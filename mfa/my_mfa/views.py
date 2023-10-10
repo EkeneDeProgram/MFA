@@ -106,22 +106,17 @@ def user_authentication(request):
 @login_required
 def generate_totp_qr_code(request):
     # Generate secret key in base32 format
-    secret_key = generate_key()
-    print(secret_key)
-    encryption_key = generate_encryption_key() # Generate encryption key
-    print(encryption_key)
-    encrypt_secret_key = encrypt_secret(secret_key, encryption_key) # Encrypt totp_secret_key
-
+    secret_key = pyotp.random_base32()
+    
     # Retrieve user UserProfile details
     user_profile = UserProfile.objects.get(user=request.user)
     username = user_profile.user.username # Get user name from django in-built User models
 
+
     # Update UserProfile details
-    user_profile.encryption_key = encryption_key
-    user_profile.totp_secret_key = encrypt_secret_key
+    user_profile.totp_secret_key = secret_key
     user_profile.save()
-    print(user_profile.encryption_key)
-    print(user_profile.totp_secret_key)
+   
     
     # Create a TOTP object
     totp = pyotp.TOTP(secret_key)
@@ -164,7 +159,9 @@ def generate_totp_qr_code(request):
     return render(request, "authentication/generate_totp.html",context)
 
 
+
 # Defind view to verify totp
+@login_required
 def verify_totp(request):
     if request.method == "POST":
         # Get the TOTP code entered by the user
@@ -173,20 +170,22 @@ def verify_totp(request):
         # Get user's profile
         user_profile = UserProfile.objects.get(user=request.user)
 
-        encryption_key = user_profile.encryption_key
-        secret_key = user_profile.totp_secret_key
-        decrypted_secret_key = decrypt_totp_secret_key(secret_key, encryption_key)
-        print(encryption_key)
-        print(secret_key)
-        print(decrypted_secret_key)
-
-        # Verify the TOTP code
-        #totp = pyotp.TOTP(user_profile.totp_secret_key)
-        totp = pyotp.TOTP(decrypted_secret_key)
-        if totp.verify(user_input_totp):
-            messages.success(request, "TOTP code is valid.")
+        if user_profile.mfa_method == "TOTP":
+            if not user_profile.totp_secret_key:
+                messages.error(request, f"No TOTP secret key found for this user: {user_profile.user.username}")
+            # Verify the TOTP code
+            totp = pyotp.TOTP(user_profile.totp_secret_key)
+            generated_totp_code = totp.now()  # Generate the TOTP code for comparison
+            print(f"User Input TOTP Code: {user_input_totp}")
+            print(f"Generated TOTP Code: {generated_totp_code}")
+            if totp.verify(user_input_totp):
+                #messages.success(request, "TOTP code is valid.")
+                return HttpResponse("YES")
+            else:
+                #messages.error(request, "Invalid TOTP code.")
+                return HttpResponse("NO")
         else:
-            messages.error(request, "Invalid TOTP code.")
+            messages.error(request, 'MFA method is not TOTP.')
     return render(request, "authentication/verify_totp.html")
 
 
