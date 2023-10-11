@@ -37,13 +37,21 @@ def decrypt_secret_key(encrypted_secret_key, encryption_key):
     # Convert the decrypted bytes back to a string (assuming it was originally in UTF-8 encoding)
     secret_key = decrypted_secret_key.decode('utf-8')
     return secret_key
-    
 
-# y = sky()
-# print(y)
-# x = generate_encryption_key()
-# print(x)
-# z = encrypt_secret_key(y, x)
-# print(z)
-# a = decrypt_secret_key(z, x)
-# print(a)
+
+def is_valid_base32_key(key):
+    try:
+        # Attempt to decode the key from base32
+        decoded_key = base64.b32decode(key, casefold=True)
+
+        # Check the length (valid keys are typically 16 or 32 bytes)
+        if len(decoded_key) in (16, 32):
+            return True
+    except Exception:
+        pass
+
+    return False   
+
+y = "HQORCRTUVRBMDIWB5GZMISDZA7HVQGA6"
+x = is_valid_base32_key(y)
+print(x)

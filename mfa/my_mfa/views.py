@@ -107,19 +107,19 @@ def user_authentication(request):
 def generate_totp_qr_code(request):
     # Generate secret key in base32 format
     secret_key = pyotp.random_base32()
+    # Specify the time step (in seconds)
+    time_step = 60
     
     # Retrieve user UserProfile details
     user_profile = UserProfile.objects.get(user=request.user)
     username = user_profile.user.username # Get user name from django in-built User models
 
-
     # Update UserProfile details
     user_profile.totp_secret_key = secret_key
     user_profile.save()
    
-    
-    # Create a TOTP object
-    totp = pyotp.TOTP(secret_key)
+    # Create a TOTP object with the specified time step
+    totp = pyotp.TOTP(user_profile.totp_secret_key, interval=time_step)
     # Generate the current TOTP value
     totp_value = totp.now()
     # Create a TOTP provisioning URL
@@ -179,11 +179,12 @@ def verify_totp(request):
             print(f"User Input TOTP Code: {user_input_totp}")
             print(f"Generated TOTP Code: {generated_totp_code}")
             if totp.verify(user_input_totp):
-                #messages.success(request, "TOTP code is valid.")
-                return HttpResponse("YES")
+                messages.success(request, "TOTP code is valid.")
             else:
-                #messages.error(request, "Invalid TOTP code.")
-                return HttpResponse("NO")
+                messages.error(request, "Invalid TOTP code.")
+                print(f"User Input TOTP Code: {user_input_totp}")
+                print(f"Generated TOTP Code: {generated_totp_code}")
+                print(f"Secret Key: {user_profile.totp_secret_key}")  
         else:
             messages.error(request, 'MFA method is not TOTP.')
     return render(request, "authentication/verify_totp.html")
