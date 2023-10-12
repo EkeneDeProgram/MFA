@@ -1,0 +1,32 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Send TOTP Code via SMS</title>
+        <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    </head>
+    <body>
+        <div class="center-container">
+            <div class="container">
+                <h1>Send TOTP Code via SMS</h1>
+                <p>Enter your phone number to receive the TOTP code via SMS:</p>
+                {% if messages %}
+                    <ul class="messages">
+                        {% for message in messages %}
+                        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                <form method="post" action="{% url 'send-totp-sms' %}">
+                    {% csrf_token %}
+                    <label for="phone_number">Phone Number:</label>
+                    <input type="text" id="phone_number" name="phone_number" placeholder="Enter your phone number" required>
+                    
+                    <button type="submit">Send TOTP Code</button>
+                </form>
+            </div>
+        </div>
+    </body>
+</html>
