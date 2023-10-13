@@ -5,36 +5,62 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Registration</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/new.css' %}">
 </head>
 <body>
     <div class="center-container">
-        <div class="registration-container">
-            <h1>User Registration</h1>
-            <form method="post" class="registration-form">
+        <div class="container">
+            <h1>Sign Up for a 909ine account</h1>
+            <p>Already have an account? <a href="{% url 'login' %}">Log in</a></p>
+            <form method="post">
                 {% csrf_token %}
                 <div class="form-group">
                     <label for="{{ form.username.id_for_label }}">Username:</label>
                     {{ form.username }}
                 </div>
+
                 <div class="form-group">
                     <label for="{{ form.email.id_for_label }}">Email:</label>
                     {{ form.email }}
                 </div>
+
                 <div class="form-group">
                     <label for="{{ form.password1.id_for_label }}">Password:</label>
                     <input type="password" name="{{ form.password1.name }}" id="{{ form.password1.id }}" class="password-field" />
                 </div>
+
                 <div class="form-group">
                     <label for="{{ form.password2.id_for_label }}">Confirm Password:</label>
                     <input type="password" name="{{ form.password2.name }}" id="{{ form.password2.id }}" class="password-field" />
                 </div>
+
                 <!-- Add "Show Password" checkbox -->
                 <div class="form-group">
                     <input type="checkbox" id="show-password-checkbox" class="show-password-checkbox" />
                     <label for="show-password-checkbox">Show Password</label>
                 </div>
+
+                <!-- Add "Enable MFA" checkbox
+                <div class="form-group">
+                    <input type="checkbox" name="enable_mfa" id="enable-mfa-checkbox" class="enable-mfa-checkbox" />
+                    <label for="enable-mfa-checkbox">Enable MFA</label>
+                </div> -->
+                <div class="form-group enable-mfa-container">
+                    <div class="enable-mfa-header">
+                        <input type="checkbox" name="enable_mfa" id="enable-mfa-checkbox" class="enable-mfa-checkbox" />
+                        <label for="enable-mfa-checkbox">Enable MFA</label>
+                    </div>
+                    <div class="enable-mfa-description">
+                        <p>Enable Multi-Factor Authentication (MFA) for added security.</p>
+                        <p>MFA adds an extra layer of protection to your account by requiring 
+                           a second form of verification in addition to your password. 
+                           This can help prevent unauthorized access even if your
+                            password is compromised.</p>
+                    </div>
+                </div>
+
                 <button type="submit" class="register-button">Register</button>
+
             </form>
         </div>
     </div>
