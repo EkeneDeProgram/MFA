@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
 from django.core.files.base import ContentFile
+from django.contrib.auth.models import User
 
 # Import third party modules
 from PIL import Image as PilImage
@@ -34,10 +35,10 @@ def register_user(request):
                 user_profile.mfa_enabled = True
                 user_profile.save()
             login(request, user) # Automatically log the user in after registration
-            return HttpResponse("Success!")
+            return render(request, "index.html")
     else:
         form = RegistrationForm()  # IF request is not POST create an instance of the RegistrationForm without any data.
-    return render(request, "registration/register.html", {"form": form})
+    return render(request, "register.html", {"form": form})
 
 
 
@@ -51,20 +52,19 @@ def user_authentication(request):
         user = authenticate(request, username=username, password=password)
 
         if user is not None: # If authentication is succesfull
-            user_profile = UserProfile.objects.get(user=user)
-            if user_profile.mfa_enabled: # Check if mfa is enable for user
+            try:
+                user_profile = UserProfile.objects.get(user=request.user)
                 if not user_profile.totp_secret_key: # If the UserProfile secret_key field is empty
                     return redirect("totp-qr-code") # Redirect to totp-qr-code url
                 else:
-                  return redirect("verify-totp") # Redirect to verify-totp url  
-            else:
-                # MFA is not enabled, log the user in
+                    return redirect("verify-totp") # Redirect to verify-totp url  
+            except UserProfile.DoesNotExist:
                 login(request, user)
-                return HttpResponse("WELCOME TO 909INE")
+                return render(request, "index.html")
         else:
             # Authentication failed, show an error message
             messages.error(request, 'Invalid username or password.')
-    return render(request, "authentication/login.html") 
+    return render(request, "login.html") 
 
 
 # Defind a view to generate totp_qr_code
@@ -121,7 +121,7 @@ def generate_totp_qr_code(request):
         "username": username,
     }
 
-    return render(request, "authentication/generate_totp.html",context)
+    return render(request, "generate_totp.html",context)
 
 
 # Defind view to verify totp
@@ -133,32 +133,14 @@ def verify_totp(request):
 
         # Get user's profile
         user_profile = UserProfile.objects.get(user=request.user)
-
-        if user_profile.mfa_method == "TOTP":
-            if not user_profile.totp_secret_key:
-                messages.error(request, f"No TOTP secret key found for this user: {user_profile.user.username}")
-            # Verify the TOTP code
-            totp = pyotp.TOTP(user_profile.totp_secret_key)
-            generated_totp_code = totp.now()  # Generate the TOTP code for comparison
-            if totp.verify(user_input_totp):
-                messages.success(request, "TOTP code is valid.")
-            else:
-                messages.error(request, "Invalid TOTP code.") 
+        # Verify the TOTP code
+        totp = pyotp.TOTP(user_profile.totp_secret_key)
+        if  totp.verify(user_input_totp):
+            messages.success(request, "TOTP code is valid.")
+            return render(request, "index.html")
         else:
-            messages.error(request, 'MFA method is not TOTP.')
-    return render(request, "authentication/verify_totp.html")
+           messages.error(request, "Invalid TOTP code.")  
+    return render(request, "verify_totp.html")
 
 
-# Define a view for updating user MFA status
-@login_required 
-def update_mfa_status(request):
-    user_profile = UserProfile.objects.get(user=request.user)
-    if request.method == "POST":
-        try:
-            user_profile.mfa_enabled = not user_profile.mfa_enabled # Toggle the MFA status
-            user_profile.save()
-            return HttpResponse("Successfull")
-        except UserProfile.DoesNotExist:
-            return render(request, "registration/user_profile_not_found.html") 
-    return render(request, "registration/update_mfa_status.html", {"user_profile": user_profile})
 
