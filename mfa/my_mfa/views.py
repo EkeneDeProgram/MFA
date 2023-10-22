@@ -6,12 +6,14 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
 from django.core.files.base import ContentFile
 from django.contrib.auth.models import User
+from django.http import JsonResponse
 
 # Import third party modules
 from PIL import Image as PilImage
 import pyotp
 import qrcode
 import io
+
 
 
 # Import my_mfa modules
@@ -43,6 +45,7 @@ def register_user(request):
 
 
 # Defind a view for user authentication
+@login_required
 def user_authentication(request):
     if request.method == "POST":
         username = request.POST["username"]
@@ -51,19 +54,19 @@ def user_authentication(request):
         # Authenticate the user using their username and password
         user = authenticate(request, username=username, password=password)
 
-        if user is not None: # If authentication is succesfull
+        if user is not None:
+            print(f"Authenticated user: {user.username}")
             try:
-                user_profile = UserProfile.objects.get(user=request.user)
+                user_profile = UserProfile.objects.get(user=user)
                 if not user_profile.totp_secret_key: # If the UserProfile secret_key field is empty
                     return redirect("totp-qr-code") # Redirect to totp-qr-code url
                 else:
-                    return redirect("verify-totp") # Redirect to verify-totp url  
+                    return redirect("verify-totp")
             except UserProfile.DoesNotExist:
-                login(request, user)
                 return render(request, "index.html")
         else:
-            # Authentication failed, show an error message
-            messages.error(request, 'Invalid username or password.')
+            messages.error(request, "Invalid username or password.")
+
     return render(request, "login.html") 
 
 
@@ -75,8 +78,11 @@ def generate_totp_qr_code(request):
     # Specify the time step (in seconds)
     time_step = 30
     
+    user = request.user  # Get the authenticated user
     # Retrieve user UserProfile details
-    user_profile = UserProfile.objects.get(user=request.user)
+    user_profile = UserProfile.objects.get(user=user)
+    print(f"{user_profile.user.username}")
+
     username = user_profile.user.username # Get user name from django in-built User models
 
     # Update UserProfile details
@@ -133,6 +139,7 @@ def verify_totp(request):
 
         # Get user's profile
         user_profile = UserProfile.objects.get(user=request.user)
+        print(f"{user_profile.user.username}")
         # Verify the TOTP code
         totp = pyotp.TOTP(user_profile.totp_secret_key)
         if  totp.verify(user_input_totp):
@@ -144,3 +151,9 @@ def verify_totp(request):
 
 
 
+def check_email_availability(request):
+    email = request.GET.get('email', None)
+    data = {
+        'is_taken': User.objects.filter(email=email).exists()
+    }
+    return JsonResponse(data)

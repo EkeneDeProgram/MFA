@@ -22,6 +22,7 @@
                 <div class="form-group">
                     <label for="{{ form.email.id_for_label }}">Email:</label>
                     {{ form.email }}
+                    <div id="email-error" class="error"></div>
                 </div>
 
                 <div class="form-group">
@@ -40,11 +41,6 @@
                     <label for="show-password-checkbox">Show Password</label>
                 </div>
 
-                <!-- Add "Enable MFA" checkbox
-                <div class="form-group">
-                    <input type="checkbox" name="enable_mfa" id="enable-mfa-checkbox" class="enable-mfa-checkbox" />
-                    <label for="enable-mfa-checkbox">Enable MFA</label>
-                </div> -->
                 <div class="form-group enable-mfa-container">
                     <div class="enable-mfa-header">
                         <input type="checkbox" name="enable_mfa" id="enable-mfa-checkbox" class="enable-mfa-checkbox" />
@@ -64,7 +60,9 @@
             </form>
         </div>
     </div>
+    <!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> -->
     <!-- Include JavaScript to toggle password visibility -->
     <script src="{% static 'js/password-toggle.js' %}"></script>
+    <!-- <script src="{% static 'js/email_validation.js' %}"></script> -->
 </body>
 </html>
