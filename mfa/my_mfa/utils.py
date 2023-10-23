@@ -1,12 +1,7 @@
 # Import third party modules
-import pyotp
+import re
 
 
-# def generate_totp_code():
-#     # Generate secret key in base32 format
-#     secret_key = pyotp.random_base32()
-#     # Specify the time step (in seconds)
-#     time_step = 60
-#     totp = pyotp.TOTP(secret_key, interval=time_step)
-#     return totp.now()
-
+def is_valid_email(email):
+    email_pattern = re.compile(r'^[\w\.-]+@[\w\.-]+\.\w+$')
+    return email_pattern.match(email)

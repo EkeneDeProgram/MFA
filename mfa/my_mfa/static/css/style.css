@@ -83,3 +83,13 @@ input[type="password"] {
     padding: 10px;
     margin: 10px 0;
 }
+
+#email-error {
+    background-color: #fff;
+    color: red;
+}
+
+#password-error {
+    background-color: #fff;
+    color: red;
+}

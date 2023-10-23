@@ -29,15 +29,21 @@ def register_user(request):
     if request.method == "POST":
         form = RegistrationForm(request.POST) # creates an instance of a RegistrationForm
         if form.is_valid():
-            user = form.save()
-            # Create a UserProfile instance and link it to the user
-            user_profile = UserProfile(user=user)
-            # Check if the "Enable MFA" checkbox is selected
-            if request.POST.get("enable_mfa"):
-                user_profile.mfa_enabled = True
-                user_profile.save()
-            login(request, user) # Automatically log the user in after registration
-            return render(request, "index.html")
+            email = form.cleaned_data["email"]
+            password1 = form.cleaned_data["password1"]
+            # Perform server-side email validation
+            if not is_valid_email(email):
+                form.add_error("email", "Invalid email address.")
+            else:
+                user = form.save()
+                # Create a UserProfile instance and link it to the user
+                user_profile = UserProfile(user=user)
+                # Check if the "Enable MFA" checkbox is selected
+                if request.POST.get("enable_mfa"):
+                    user_profile.mfa_enabled = True
+                    user_profile.save()
+                login(request, user) # Automatically log the user in after registration
+                return render(request, "index.html")
     else:
         form = RegistrationForm()  # IF request is not POST create an instance of the RegistrationForm without any data.
     return render(request, "register.html", {"form": form})

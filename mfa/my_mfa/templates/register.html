@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Registration</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
     <div class="center-container">
@@ -22,12 +22,23 @@
                 <div class="form-group">
                     <label for="{{ form.email.id_for_label }}">Email:</label>
                     {{ form.email }}
-                    <div id="email-error" class="error"></div>
+                    <div id="email-error" class="error">
+                        {% if form.email.errors %}
+                            {{ form.email.errors.0 }}
+                        {% endif %}
+                    </div>
                 </div>
 
                 <div class="form-group">
                     <label for="{{ form.password1.id_for_label }}">Password:</label>
                     <input type="password" name="{{ form.password1.name }}" id="{{ form.password1.id }}" class="password-field" />
+                    <div id="password-error" class="error">
+                        {% if form.password1.errors %}
+                            {% for error in form.password1.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        {% endif %}
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -60,9 +71,6 @@
             </form>
         </div>
     </div>
-    <!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> -->
-    <!-- Include JavaScript to toggle password visibility -->
     <script src="{% static 'js/password-toggle.js' %}"></script>
-    <!-- <script src="{% static 'js/email_validation.js' %}"></script> -->
 </body>
 </html>
