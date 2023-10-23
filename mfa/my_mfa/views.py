@@ -14,17 +14,14 @@ import pyotp
 import qrcode
 import io
 
-
-
 # Import my_mfa modules
 from .forms import RegistrationForm
 from .models import UserProfile 
 from .utils import *  
 
-
 # Create your views here.
 
-# Registration view function
+# Registration view
 def register_user(request):
     if request.method == "POST":
         form = RegistrationForm(request.POST) # creates an instance of a RegistrationForm
@@ -49,7 +46,6 @@ def register_user(request):
     return render(request, "register.html", {"form": form})
 
 
-
 # Defind a view for user authentication
 @login_required
 def user_authentication(request):
@@ -61,7 +57,6 @@ def user_authentication(request):
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
-            print(f"Authenticated user: {user.username}")
             try:
                 user_profile = UserProfile.objects.get(user=user)
                 if not user_profile.totp_secret_key: # If the UserProfile secret_key field is empty
@@ -76,7 +71,7 @@ def user_authentication(request):
     return render(request, "login.html") 
 
 
-# Defind a view to generate totp_qr_code
+# Defind a view to generate totp qr code
 @login_required
 def generate_totp_qr_code(request):
     # Generate secret key in base32 format
@@ -87,8 +82,6 @@ def generate_totp_qr_code(request):
     user = request.user  # Get the authenticated user
     # Retrieve user UserProfile details
     user_profile = UserProfile.objects.get(user=user)
-    print(f"{user_profile.user.username}")
-
     username = user_profile.user.username # Get user name from django in-built User models
 
     # Update UserProfile details
@@ -125,7 +118,7 @@ def generate_totp_qr_code(request):
 
     qr_code = user_profile.image.url
     
-    # Pass the TOTP URL, QR code image, secret key, and TOTP value to the template
+    # Pass the TOTP URL, QR code image, TOTP value and username to the template
     context = {
         "totp_url": totp_url,
         "qr_code": qr_code,
@@ -136,7 +129,7 @@ def generate_totp_qr_code(request):
     return render(request, "generate_totp.html",context)
 
 
-# Defind view to verify totp
+# Defind view to verify totp code
 @login_required
 def verify_totp(request):
     if request.method == "POST":
@@ -155,11 +148,3 @@ def verify_totp(request):
            messages.error(request, "Invalid TOTP code.")  
     return render(request, "verify_totp.html")
 
-
-
-def check_email_availability(request):
-    email = request.GET.get('email', None)
-    data = {
-        'is_taken': User.objects.filter(email=email).exists()
-    }
-    return JsonResponse(data)
