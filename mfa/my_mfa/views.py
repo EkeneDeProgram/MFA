@@ -21,7 +21,11 @@ from .utils import *
 
 # Create your views here.
 
-# Registration view
+def index(request):
+    return render(request, "index.html")
+
+
+# Defin Registration view
 def register_user(request):
     if request.method == "POST":
         form = RegistrationForm(request.POST) # creates an instance of a RegistrationForm
@@ -40,7 +44,7 @@ def register_user(request):
                     user_profile.mfa_enabled = True
                     user_profile.save()
                 login(request, user) # Automatically log the user in after registration
-                return render(request, "index.html")
+                return redirect("index")
     else:
         form = RegistrationForm()  # IF request is not POST create an instance of the RegistrationForm without any data.
     return render(request, "register.html", {"form": form})
@@ -64,7 +68,7 @@ def user_authentication(request):
                 else:
                     return redirect("verify-totp")
             except UserProfile.DoesNotExist:
-                return render(request, "index.html")
+                return redirect("index")
         else:
             messages.error(request, "Invalid username or password.")
 
@@ -138,7 +142,6 @@ def verify_totp(request):
 
         # Get user's profile
         user_profile = UserProfile.objects.get(user=request.user)
-        print(f"{user_profile.user.username}")
         # Verify the TOTP code
         totp = pyotp.TOTP(user_profile.totp_secret_key)
         if  totp.verify(user_input_totp):
